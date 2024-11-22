@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>App Demo 3 - Fila</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+  <script>
+
+
+	const publicar = () => {
+
+		const email = document.getElementById("txt-emails").value.trim();
+        const msg = document.getElementById("txt-mensagem").value.trim();
+            
+		if (email == "" || msg == "") {
+			alert('Informe todos os dados.');
+			return;
+		}
+		
+        fetch('/publicar', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                email,
+                msg
+            })
+        })
+        .then(response => response.text())
+        .then(result => {
+            alert(result);
+        })
+        .catch(error => {
+            alert('Erro ao enviar.');
+        });
+	}
+
+    const publicarCanal = () => {
+
+        const email = document.getElementById("txt-emails").value.trim();
+        const msg = document.getElementById("txt-mensagem").value.trim();
+            
+        if (email == "" || msg == "") {
+            alert('Informe todos os dados.');
+            return;
+        }
+
+        fetch('/publicarCanal', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                email,
+                msg
+            })
+        })
+        .then(response => response.text())
+        .then(result => {
+            alert(result);
+        })
+        .catch(error => {
+            alert('Erro ao enviar.');
+        });
+    }
+
+	const consumir = () => {
+
+        fetch('/consumir', {
+            method: 'get',
+        })
+        .then(response => response.text())
+        .then(result => {
+        })
+        .catch(error => {
+            alert('Erro ao consumir.');
+        });
+    }
+
+    const consumirCanal = () => {
+
+        fetch('/consumirCanal', {
+            method: 'get',
+        })
+        .then(response => response.text())
+        .then(result => {
+        })
+        .catch(error => {
+            alert('Erro ao consumir.');
+        });
+    }
+
+  </script>
+</head>
+<body>
+	<div class="container">
+        <div class="container-fluid px-3 py-4">
+            <h1 class="">Fila - Produtor</h1>
+            <div class="form-group my-2">
+                <label>E-mail </label>
+                <input type="text" class="form-control" id="txt-emails" value="andremenegassi@unoeste">
+            </div>
+
+            <div class="form-group my-2">
+                <label>Texto da mensagem de e-mail</label>
+                <textarea class="form-control" id="txt-mensagem" rows="3">texto teste</textarea>
+            </div>
+        
+            
+            <button type="button" class="btn btn-primary my-2" onclick="publicar()">PUBLICAR</button>
+            <button type="button" class="btn btn-primary my-2" onclick="publicarCanal()">PUBLICAR - CANAL</button>
+
+        </div>
+
+        <div class="container-fluid px-3 py-5">
+            <h1 class="">Fila - Consumidor</h1>
+            
+            <button type="button" class="btn btn-primary my-2" onclick="consumir()">CONSUMIR</button>
+            <button type="button" class="btn btn-primary my-2" onclick="consumirCanal()">CONSUMIR - CANAL</button>
+
+        </div>
+
+    </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"></script>
+
+</body>
+</html>

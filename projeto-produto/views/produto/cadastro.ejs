@@ -1,0 +1,56 @@
+<script src="/public/js/Produto/cadastrar.js"></script>
+<div>
+    <h1>Cadastrar produto</h1>
+</div>
+
+<div>
+    <form method="POST" enctype="multipart/form-data" action="/admin/produto/cadastro">
+        <div class="form-group">
+            <label for="inputCodigo">Código</label>
+            <input type="text" class="form-control" id="inputCodigo" name="codigo">
+        </div>
+        <div class="form-group">
+            <label for="inputNome">Nome</label>
+            <input type="text" class="form-control" id="inputNome" name="nome">
+        </div>
+        <div class="form-group">
+            <label for="inputQtde">Quantidade</label>
+            <input type="number" class="form-control" id="inputQtde" name="quantidade">
+        </div>
+        <div class="form-group">
+            <label for="inputPreco">Preço</label>
+            <input type="number" class="form-control" id="inputPreco" name="preco">
+        </div>
+        <div class="form-group">
+            <label for="selMarca">Marca</label>
+            <select class="form-control" id="selMarca" name="marca">
+                <option value="0">--Selecione--</option>
+                <% for (let i = 0; i < listaMarcas.length; i++) { %>
+                    <option value="<%= listaMarcas[i].marcaId %>"><%= listaMarcas[i].marcaNome %></option>
+                <% } %>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="selCategoria">Categoria</label>
+            <select class="form-control" id="selCategoria" name="categoria">
+                <option value="0">--Selecione--</option>
+                <% for (let i = 0; i < listaCategorias.length; i++) { %>
+                    <option value="<%= listaCategorias[i].categoriaId %>"><%= listaCategorias[i].categoriaNome %></option>
+                <% } %>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Imagem do produto</label>
+            <input class="form-control" type="file" id="inputImagem" name="inputImagem">
+            <div>
+                <img style="display:none;width:200px" id="imgInput" alt="Imagem do produto">
+            </div>
+        </div>
+
+        <div>
+            <button class="btn btn-primary" type="submit" id="btnGravar">Gravar</button>
+            <a href="/admin/produto" class="btn btn-default">Voltar</a>
+        </div>
+    </form>
+</div>
