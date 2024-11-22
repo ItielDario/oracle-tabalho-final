@@ -23,40 +23,43 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function gravarPedido() {
     let carrinho = localStorage.getItem('carrinho');
+    let email = document.getElementById("email").value; // Captura o valor do email
 
-    if(carrinho != null && carrinho != ''){
+    if (carrinho != null && carrinho != '' && email != '' && email != null) {
+        // Converte os dados em um objeto para enviar como JSON
+        let data = {
+            carrinho: JSON.parse(carrinho), // Converte o carrinho para objeto, se necessário
+            email: email
+        };
+
+        console.log(data)
 
         fetch('/gravar-pedido', {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: carrinho
+            body: JSON.stringify(data) // Converte o objeto para uma string JSON
         })
-        .then(r => {
-            return r.json();
-        })
-        .then(function(r) {
-            if(r.ok){
+        .then(response => response.json()) // Transforma a resposta em JSON
+        .then(function(response) {
+            if (response.ok) {
                 alert("Pedido gravado com sucesso");
-                //remove tudo do localStorage
-                //localStorage.clear();
-                //remove apenas uma chave com seu valor do local
+                // Limpa o localStorage e atualiza o DOM
                 localStorage.removeItem('carrinho');
                 document.getElementById("valorTotalCarrinho").innerHTML = "";
                 document.getElementById("corpoTabelaCarrinho").innerHTML = "";
                 document.getElementById("contadorCarrinho").innerText = 0;
-            }
-            else{
-                alert(r.msg);
+            } else {
+                alert(response.msg || "Erro ao gravar o pedido");
             }
         })
-        .catch(function(e) {
-
-        })
-    }
-    else{
-        alert("Carrinho vazio!!!");
+        .catch(function(error) {
+            console.error("Erro na requisição:", error);
+            alert("Ocorreu um erro ao processar o pedido. Tente novamente.");
+        });
+    } else {
+        alert("Adicone itens no carrinho e preencha o seu email!");
     }
 }
 

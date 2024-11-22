@@ -12,6 +12,7 @@ class VitrineController {
     }
 
     async gravarPedido(req, res){
+        console.log(req.body)
         var ok = false;
         var msg = "";
         if(req.body != null && req.body != ""){

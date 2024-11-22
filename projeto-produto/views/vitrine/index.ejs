@@ -133,12 +133,23 @@
                             </div>
                         </div>
 
-                        <h1>Enviar E-mail</h1>
-                            <form action="/publicar" method="POST">
-                                <label for="email">E-mail:</label>
-                                <input type="email" id="email" name="email" required placeholder="Digite o e-mail" />
-                                <br><br>
+                        <!-- Formulário -->
+                        <div class="email-section mt-4" style="padding: 20px 20PX 40px 20px; border: 1px solid #ddd; background-color: #f9f9f9;">
+                            <form action="/publicar" method="POST" class="d-flex flex-column gap-3">
+                                <div class="form-group">
+                                    <label for="email" class="form-label" style="margin-bottom: 10px; font-size: 16px; font-weight: 500; color: #555;">E-mail:</label>
+                                    <input 
+                                        type="email" 
+                                        id="email" 
+                                        name="email" 
+                                        class="form-control" 
+                                        style="padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 14px;" 
+                                        required 
+                                        placeholder="Digite seu e-mail" />
+                                </div>
                             </form>
+                        </div>
+
 
                         <div class="modal-footer" style="display:block;">
                             <div id="valorTotalCarrinho" style="text-align:end;">
