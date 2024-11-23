@@ -32,8 +32,6 @@ function gravarPedido() {
             email: email
         };
 
-        console.log(data)
-
         fetch('/gravar-pedido', {
             method: "POST",
             headers: {
@@ -45,17 +43,11 @@ function gravarPedido() {
         .then(function(response) {
             if (response.ok) {
                 alert("Pedido gravado com sucesso");
-                // Limpa o localStorage e atualiza o DOM
-                localStorage.removeItem('carrinho');
-                document.getElementById("valorTotalCarrinho").innerHTML = "";
-                document.getElementById("corpoTabelaCarrinho").innerHTML = "";
-                document.getElementById("contadorCarrinho").innerText = 0;
             } else {
                 alert(response.msg || "Erro ao gravar o pedido");
             }
         })
         .catch(function(error) {
-            console.error("Erro na requisição:", error);
             alert("Ocorreu um erro ao processar o pedido. Tente novamente.");
         });
     } else {
@@ -171,6 +163,7 @@ function excluirItem(id) {
 function carregarCarrinho() {
     
     let carrinho  = localStorage.getItem('carrinho');
+
     if(carrinho != null && carrinho != "") {
         let listaCarrinho = JSON.parse(carrinho);
 
@@ -234,7 +227,6 @@ function adicionarAoCarrinho() {
         })
         .then(r=> {
             if(r.ok) {
-                console.log(r.retorno);
                 let listaCarrinho = [];
                 let carrinho = localStorage.getItem("carrinho");
                 if(carrinho != null && carrinho != "") {

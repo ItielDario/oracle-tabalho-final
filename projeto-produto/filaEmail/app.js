@@ -1,90 +1,61 @@
-const express = require('express');
-const nodemailer = require('nodemailer');
-
-const app = express();
-app.use(express.json()); // Para analisar application/json
-const port = 3000;
-
 const { ociHttpRequest } = require("./ociHttpRequest");
+const nodemailer = require('nodemailer'); // Importação do nodemailer
 const queueId = "ocid1.queue.oc1.phx.amaaaaaafsrhgwyayqwdrefvrekvnb4ma752njfabhqswef2voelkzdp4dwq";
 const queueRegion = "https://cell-1.queue.messaging.us-phoenix-1.oci.oraclecloud.com";
 
-// Configurar EJS como a engine de visualização
-app.set('view engine', 'ejs');
+async function consumir() {
+    try {
+        console.log(`Aguardando mensagens na fila: ${queueId}`);
 
-app.get('/', (req, res) => {
-  res.render('index');
-});
-
-
-app.post('/publicar', async (req, res) => {
-   
-    const data = req.body;
-
-    const email = data.email;
-    const msg = data.msg;
-
-    console.log('email publicado: ')
-    console.log(email)
-    console.log(msg)
-    console.log('------------------------------------')
-
-    const putMessagesRequest = {
-        queueId: queueId,
-        messages: [ {
-            content: JSON.stringify({email, msg})
+        while (true) {
+            // Obtendo as mensagens da fila
+            let retorno = await ociHttpRequest(`${queueRegion}/20210201/queues/${queueId}/messages?queueId=${queueId}&limit=10`, "GET");
+            
+            const messages = retorno.messages;
+            if (messages.length === 0) {
+                console.log("Nenhuma mensagem disponível. Verificando novamente em alguns segundos...");
+                // Espera 5 segundos antes de tentar novamente
+                await new Promise(res => setTimeout(res, 5000)); 
+                continue;
             }
-        ]
-     };
-     
-     let result = await ociHttpRequest(`${queueRegion}/20210201/queues/${queueId}/messages`, "POST", putMessagesRequest)
 
-     console.log(result);
-  
-    res.status(200).send('Inserido na fila.');
-});
-
-
-app.get('/consumir', async (req, res) => {
-    let retorno = await ociHttpRequest(`${queueRegion}/20210201/queues/${queueId}/messages?queueId=${queueId}&limit=10`, "GET");
-
-    if (retorno && retorno.messages) {
-        retorno.messages.forEach(async msgFila => {
-            try {
-                const content = JSON.parse(msgFila.content); // Extrai o JSON do campo `content`
-                const email = content.email;
-                const msg = content.msg;
-
-                console.log('Email a ser enviado:');
-                console.log(email);
-                console.log(msg);
-                console.log('------------------------------------');
-
-                const receipt = msgFila.receipt;
-
-                // Envia o e-mail
-                await enviarEmail("Teste Fila OCI", email, msg);
-
-                // Remove a mensagem da fila
-                await ociHttpRequest(`${queueRegion}/20210201/queues/${queueId}/messages/${receipt}`, "DELETE");
-            } catch (error) {
-                console.error('Erro ao processar a mensagem:', error);
-
-                // Recoloca a mensagem na fila com atraso
-                if (msgFila.receipt) {
-                    let alteracao = {
-                        visibilityInSeconds: 30
-                    };
-                    await ociHttpRequest(`${queueRegion}/20210201/queues/${queueId}/messages/${msgFila.receipt}`, "PUT", alteracao);
+            messages.forEach(async msgFila => {
+                try {
+                    console.log("Mensagem recebida:", msgFila.content);
+            
+                    // Converter o conteúdo JSON em um objeto
+                    const content = JSON.parse(msgFila.content);
+            
+                    let email = content.email;
+                    let msg = content.msg;
+            
+                    let receipt = msgFila.receipt;
+            
+                    // Código para enviar o e-mail
+                    enviarEmail("Confirmação de compra realizada", email, msg);
+            
+                    // Retirar da fila
+                    await ociHttpRequest(`${queueRegion}/20210201/queues/${queueId}/messages/${receipt}`, "DELETE");
+                } catch (ex) {
+                    console.error("Erro ao processar mensagem:", ex);
+            
+                    // Para recolocar a mensagem na fila caso o processamento falhe
+                    try {
+                        let alteracao = { visibilityInSeconds: 30 };
+                        await ociHttpRequest(`${queueRegion}/20210201/queues/${queueId}/messages/${msgFila.receipt}`, "PUT", alteracao);
+                    } catch (errorUpdate) {
+                        console.error("Erro ao atualizar visibilidade da mensagem:", errorUpdate);
+                    }
                 }
-            }
-        });
+            });
+        }
+    } catch (err) {
+        console.error("Erro ao consumir mensagens:", err);
     }
-
-    res.status(200).send('Mensagens processadas.');
-});
+}
 
 const enviarEmail = (assunto, destinatario, corpoHtml) => {
+    console.log(assunto + ' ' + destinatario + ' ' + corpoHtml);
 
     // Configuração do transportador de e-mail
     let transporter = nodemailer.createTransport({
@@ -100,8 +71,7 @@ const enviarEmail = (assunto, destinatario, corpoHtml) => {
         from: 'itiel.dario@gmail.com', // Endereço de e-mail do remetente
         to: destinatario,
         subject: assunto,
-        //text: 'Conteúdo do e-mail em texto simples',
-         html: corpoHtml
+        html: corpoHtml
     };
 
     // Enviar e-mail
@@ -111,11 +81,6 @@ const enviarEmail = (assunto, destinatario, corpoHtml) => {
         }
         console.log('E-mail enviado: ' + info.response);
     });
-
 }
 
-
-
-app.listen(port, () => {
-  console.log(`Servidor rodando em http://localhost:${port}`);
-});
+consumir();
